@@ -21,13 +21,13 @@ function incrementCount() {
 
 socket.on("updateCount", (data) => {
     let total = data.reduce((sum, row) => sum + row.count, 0);
-    document.getElementById("countDisplay").innerText = "合計回数: " + total;
+    document.getElementById("countDisplay").innerText = "合計数: " + total + " 個";
 
     let userList = document.getElementById("userCounts");
     userList.innerHTML = "";
     data.forEach((row) => {
         let li = document.createElement("li");
-        li.innerText = `${row.name}: ${row.count}回`;
+        li.innerText = `${row.name}: ${row.count} 個`;
         userList.appendChild(li);
     });
 });
