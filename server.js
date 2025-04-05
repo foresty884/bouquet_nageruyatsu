@@ -33,14 +33,15 @@ io.on("connection", (socket) => {
         db.run("DELETE FROM counts", () => updateClients());
     });
 
+    socket.on("resetUser", (name) => {
+        db.run("DELETE FROM counts WHERE name = ?", [name], () => updateClients());
+    });    
+
     function updateClients() {
         db.all("SELECT * FROM counts", (err, rows) => {
             if (!err) io.emit("updateCount", rows);
         });
     }
-});
-socket.on("resetUser", (name) => {
-    db.run("DELETE FROM counts WHERE name = ?", [name], () => updateClients());
 });
 
 server.listen(5000, () => console.log("Server running on port 5000"));
