@@ -1,0 +1,17 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #87cefa;
+}
+
+.hidden {
+    display: none;
+}
+
+#flowerBtn {
+    width: 150px;
+    height: 150px;
+    cursor: pointer;
+}
+
+ul {list-style-type: none;}
