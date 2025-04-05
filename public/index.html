@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブーケ投げるやつ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style type="text/css">
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      display: table;
+    }
+    body {
+      display: table-cell;
+      text-align: center;
+      vertical-align: middle;
+    }
+</style>
+<body>
+    <div id="login">
+        <input type="text" id="nameInput" placeholder="名前を入力">
+        <button onclick="enterRoom()">入室</button>
+    </div>
+
+    <div id="room" class="hidden">
+        <p id="userName"></p>
+        <img src="flower.png" id="flowerBtn" onclick="incrementCount()">
+        <div id="countDisplay">合計回数: 0</div>
+        <ul id="userCounts"></ul>
+    </div>
+    <div id="adminMenu" class="hidden">
+      <select id="userSelect"></select>
+      <button onclick="resetUser()">個別リセット</button>
+      <button onclick="resetAll()">全体リセット</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
