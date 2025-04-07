@@ -1,8 +1,11 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const sqlite3 = require("sqlite3").verbose();
+const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config();
+
+const Count = require("./models/Count");
 
 const app = express();
 const server = http.createServer(app);
@@ -11,36 +14,41 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(cors());
 app.use(express.static("public"));
 
-// データベース接続
-const db = new sqlite3.Database("database.db", (err) => {
-    if (err) console.error(err.message);
-    db.run("CREATE TABLE IF NOT EXISTS counts (name TEXT PRIMARY KEY, count INTEGER)");
-});
+// MongoDB接続
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // WebSocket処理
 io.on("connection", (socket) => {
     // 初期データ送信
-    db.all("SELECT * FROM counts", (err, rows) => {
-        if (!err) socket.emit("updateCount", rows);
+    Count.find().then((counts) => {
+        socket.emit("updateCount", counts);
     });
 
-    socket.on("click", (name) => {
-        db.run("INSERT INTO counts (name, count) VALUES (?, 1) ON CONFLICT(name) DO UPDATE SET count = count + 1", [name]);
+    socket.on("click", async (name) => {
+        await Count.findOneAndUpdate(
+            { name },
+            { $inc: { count: 1 } },
+            { upsert: true, new: true }
+        );
         updateClients();
     });
 
-    socket.on("resetAll", () => {
-        db.run("DELETE FROM counts", () => updateClients());
+    socket.on("resetAll", async () => {
+        await Count.deleteMany({});
+        updateClients();
+        
     });
-
-    socket.on("resetUser", (name) => {
-        db.run("DELETE FROM counts WHERE name = ?", [name], () => updateClients());
-    });    
-
-    function updateClients() {
-        db.all("SELECT * FROM counts", (err, rows) => {
-            if (!err) io.emit("updateCount", rows);
-        });
+    socket.on("resetUser", async (name) => {
+        await Count.deleteOne({ name });
+        updateClients();
+    });
+    async function updateClients() {
+        const counts = await Count.find();
+        io.emit("updateCount", counts);
     }
 });
 
